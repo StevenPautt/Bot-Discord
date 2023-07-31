@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
-const fs = require('fs');
+const fs = require('fs').promises;
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
@@ -41,9 +41,27 @@ module.exports = {
         const esProxy = data?.security?.proxy ? traducirBoolean(data.security.proxy) : 'No disponible';
         const esTOR = data?.security?.tor ? traducirBoolean(data.security.tor) : 'No disponible';
 
-        // Responder con la información de la dirección IP
-        interaction.reply(
-          `Información sobre la dirección IP ${ipAddress}:\n`
+        // Guardar la información en un archivo JSON
+        const newData = {
+          ip: ipAddress,
+          nickname: nickname,
+        };
+
+        // Leer el archivo JSON actual (si existe)
+        let database = [];
+        try {
+          const databaseContent = await fs.readFile('database.json', 'utf8');
+          database = JSON.parse(databaseContent);
+        } catch (error) {
+          // El archivo no existe o está vacío
+        }
+
+        // Verificar si la IP o el nickname ya están en la base de datos
+        const ipExists = database.some((entry) => entry.ip === newData.ip);
+        const nicknameExists = database.some((entry) => entry.nickname === newData.nickname);
+
+        // Construir la respuesta con la información de la dirección IP y la información de la base de datos
+        let replyMessage = `Información sobre la dirección IP ${ipAddress}:\n`
           + `¿Es una VPN?: ${esVPN}\n`
           + `¿Es un proxy?: ${esProxy}\n`
           + `¿Es TOR?: ${esTOR}\n`
@@ -54,37 +72,15 @@ module.exports = {
           + `Longitud: ${data?.location?.longitude ?? 'No disponible'}\n`
           + `Zona horaria: ${data?.location?.time_zone ?? 'No disponible'}\n`
           + `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}\n`
-          + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`
-        );
+          + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`;
 
-        // Guardar la información en un archivo JSON
-        const newData = {
-          ip: ipAddress,
-          nickname: nickname,
-        };
-
-        // Leer el archivo JSON actual (si existe)
-        let database = [];
-        try {
-          const databaseContent = fs.readFileSync('database.json', 'utf8');
-          database = JSON.parse(databaseContent);
-        } catch (error) {
-          // El archivo no existe o está vacío
-        }
-
-        // Verificar si la IP o el nickname ya están en la base de datos
-        const ipExists = database.some((entry) => entry.ip === newData.ip);
-        const nicknameExists = database.some((entry) => entry.nickname === newData.nickname);
-
-        // Verificar si la IP o el nickname ya están en la base de datos y mostrar el resultado
+        // Verificar si la IP o el nickname ya están en la base de datos y agregar el mensaje correspondiente
         if (ipExists || nicknameExists) {
-          interaction.followUp('Ya existe en la base de datos.');
-        } else {
-          // Agregar la nueva entrada a la base de datos y guardarla en el archivo JSON
-          database.push(newData);
-          fs.writeFileSync('database.json', JSON.stringify(database, null, 2));
-          interaction.followUp('Información guardada en la base de datos.');
+          replyMessage += '\nYa existe en la base de datos.';
         }
+
+        // Responder con la información completa
+        await interaction.reply(replyMessage);
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
       }
