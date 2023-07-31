@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const db = require('./db');
-const Table = require('cli-table3');
+const { table } = require('table');
 
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
@@ -38,44 +38,36 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const table = new Table({
-          chars: {
-            top: '═',
-            'top-mid': '╤',
-            'top-left': '╔',
-            'top-right': '╗',
-            bottom: '═',
-            'bottom-mid': '╧',
-            'bottom-left': '╚',
-            'bottom-right': '╝',
-            left: '║',
-            'left-mid': '╟',
-            mid: '─',
-            'mid-mid': '┼',
-            right: '║',
-            'right-mid': '╢',
-            middle: '│'
-          },
-          style: {
-            head: ['cyan'],
-            border: ['grey']
-          }
-        });
+        const outputTable = [
+          ['Información sobre la dirección IP', ipAddress],
+          ['¿Es una VPN?', esVPN],
+          ['¿Es un proxy?', esProxy],
+          ['¿Es TOR?', esTOR],
+          ['País', data?.location?.country ?? 'No disponible'],
+          ['Continente', data?.location?.continent ?? 'No disponible'],
+          ['Código del país', data?.location?.country_code ?? 'No disponible'],
+          ['Latitud', data?.location?.latitude ?? 'No disponible'],
+          ['Longitud', data?.location?.longitude ?? 'No disponible'],
+          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
+          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
+          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
+        ];
 
-        table.push(
-          { 'Información sobre la dirección IP': ipAddress },
-          { '¿Es una VPN?': esVPN },
-          { '¿Es un proxy?': esProxy },
-          { '¿Es TOR?': esTOR },
-          { 'País': data?.location?.country ?? 'No disponible' },
-          { 'Continente': data?.location?.continent ?? 'No disponible' },
-          { 'Código del país': data?.location?.country_code ?? 'No disponible' },
-          { 'Latitud': data?.location?.latitude ?? 'No disponible' },
-          { 'Longitud': data?.location?.longitude ?? 'No disponible' },
-          { 'Zona horaria': data?.location?.time_zone ?? 'No disponible' },
-          { 'Autonomous System Number (ASN)': data?.network?.autonomous_system_number ?? 'No disponible' },
-          { 'Autonomous System Organization (ASO)': data?.network?.autonomous_system_organization ?? 'No disponible' }
-        );
+        // Configuración de la tabla
+        const config = {
+          columns: {
+            0: {
+              alignment: 'left',
+              width: 30,
+            },
+            1: {
+              alignment: 'left',
+              width: 20,
+            },
+          },
+        };
+
+        const output = table(outputTable, config);
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
@@ -87,7 +79,7 @@ module.exports = {
             return;
           }
 
-          const successMessage = `\nInformación agregada a la base de datos:\n${table.toString()}`;
+          const successMessage = `\nInformación agregada a la base de datos:\n${output}`;
           interaction.reply(successMessage);
         });
       } else {
