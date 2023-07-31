@@ -7,7 +7,7 @@ const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
 // Función para traducir true/false a SI⚠️ o NO
 function traducirBoolean(valor) {
-  return valor ? 'SI⚠️' : 'NO';
+  return valor ? 'SI⚠️' : '';
 }
 
 module.exports = {
@@ -65,11 +65,11 @@ module.exports = {
         }
 
         // Verificar si la IP o el nickname ya están en la base de datos
-        const existingEntry = database.find((entry) => entry.ip === ipAddress || entry.nickname === nickname);
+        const existsInDatabase = database.some((entry) => entry.ip === ipAddress || entry.nickname === nickname);
 
-        if (existingEntry) {
+        if (existsInDatabase) {
           // Si la IP o el nickname ya están en la base de datos, mostrar el mensaje correspondiente
-          replyMessage += `\nYa existe en la base de datos: Usuario ${existingEntry.nickname} con IP ${existingEntry.ip}`;
+          replyMessage += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
         } else {
           // Si no existe, agregar el nuevo objeto a la base de datos
           const newData = {
