@@ -15,7 +15,8 @@
     "fs": "^0.0.1-security",
     "mysql": "^2.18.1",
     "mysql2": "^3.5.2",
-    "readline-sync": "^1.4.10"
+    "readline-sync": "^1.4.10",
+    "table": "^6.8.1"
   },
   "description": ""
 }
