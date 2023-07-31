@@ -5,9 +5,9 @@ const fs = require('fs').promises;
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
-// Función para traducir true/false a SI/NO
+// Función para traducir true/false a SI⚠️ o NO
 function traducirBoolean(valor) {
-  return valor ? '⚠️' : '';
+  return valor ? 'SI⚠️' : 'NO';
 }
 
 module.exports = {
@@ -36,7 +36,7 @@ module.exports = {
       if (response.status === 200) {
         const data = response.data;
 
-        // Realizar la traducción de true/false a SI/NO usando la función traducirBoolean
+        // Realizar la traducción de true/false a SI⚠️ o NO usando la función traducirBoolean
         const esVPN = traducirBoolean(data?.security?.vpn);
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
@@ -75,9 +75,9 @@ module.exports = {
           const newData = {
             ip: ipAddress,
             nickname: nickname,
-            esVPN: esVPN,
-            esProxy: esProxy,
-            esTOR: esTOR,
+            esVPN: data?.security?.vpn,
+            esProxy: data?.security?.proxy,
+            esTOR: data?.security?.tor,
             country: data?.location?.country ?? 'No disponible',
             continent: data?.location?.continent ?? 'No disponible',
             country_code: data?.location?.country_code ?? 'No disponible',
