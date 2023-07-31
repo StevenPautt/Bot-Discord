@@ -72,7 +72,8 @@ module.exports = {
 
           if (results.length > 0) {
             // Si el usuario ya está en la base de datos, mostrar el mensaje correspondiente
-            output += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
+            const message = `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
+            interaction.reply(`\`\`\`${output}${message}\`\`\``);
           } else {
             // Si no existe, agregar el nuevo registro a la base de datos
             const insertQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor) VALUES (?, ?, ?, ?, ?)`;
