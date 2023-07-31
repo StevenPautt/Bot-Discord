@@ -85,12 +85,10 @@ module.exports = {
               }
 
               // Mostrar el mensaje de que se agregó la información
-              output += '\nInformación agregada a la base de datos.';
+              const successMessage = '\nInformación agregada a la base de datos.';
+              interaction.reply(`\`\`\`${output}${successMessage}\`\`\``);
             });
           }
-
-          // Responder con la tabla completa
-          interaction.reply(`\`\`\`${output}\`\`\``);
         });
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
