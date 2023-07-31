@@ -7,7 +7,7 @@ const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
 // Función para traducir true/false a SI⚠️ o NO
 function traducirBoolean(valor) {
-  return valor ? 'SI⚠️' : '';
+  return valor ? 'SI ⚠️' : 'NO';
 }
 
 module.exports = {
