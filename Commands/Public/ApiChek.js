@@ -4,7 +4,7 @@ const readlineSync = require('readline-sync');
 const fs = require('fs');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
-const apiKey = 'YOUR_API_KEY';
+const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
 // Función para traducir true/false a SI/NO
 function traducirBoolean(valor) {
