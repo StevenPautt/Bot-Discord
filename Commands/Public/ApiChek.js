@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
-const fs = require('fs').promises;
+const mysql = require('mysql');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
@@ -9,6 +9,23 @@ const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 function traducirBoolean(valor) {
   return valor ? 'SI ⚠️' : 'NO';
 }
+
+// Configuración de la conexión a MySQL
+const connection = mysql.createConnection({
+  host: 'tu_host',
+  user: 'tu_usuario',
+  password: 'tu_contraseña',
+  database: 'tu_base_de_datos',
+});
+
+// Establecer la conexión a MySQL
+connection.connect((err) => {
+  if (err) {
+    console.error('Error al conectar a la base de datos:', err);
+    return;
+  }
+  console.log('Conexión a la base de datos establecida.');
+});
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -55,49 +72,37 @@ module.exports = {
           + `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}\n`
           + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`;
 
-        // Leer el archivo JSON actual (si existe)
-        let database = [];
-        try {
-          const databaseContent = await fs.readFile('database.json', 'utf8');
-          database = JSON.parse(databaseContent);
-        } catch (error) {
-          // El archivo no existe o está vacío
-        }
+        // Verificar si el usuario ya está en la base de datos
+        const sqlQuery = `SELECT * FROM usuarios WHERE nickname = ? OR ip = ?`;
+        connection.query(sqlQuery, [nickname, ipAddress], (err, results) => {
+          if (err) {
+            console.error('Error al realizar la consulta:', err);
+            interaction.reply('Error al consultar la base de datos.');
+            return;
+          }
 
-        // Verificar si la IP o el nickname ya están en la base de datos
-        const existsInDatabase = database.some((entry) => entry.ip === ipAddress || entry.nickname === nickname);
+          if (results.length > 0) {
+            // Si el usuario ya está en la base de datos, mostrar el mensaje correspondiente
+            replyMessage += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
+          } else {
+            // Si no existe, agregar el nuevo registro a la base de datos
+            const insertQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor) VALUES (?, ?, ?, ?, ?)`;
+            const insertValues = [nickname, ipAddress, data?.security?.vpn, data?.security?.proxy, data?.security?.tor];
+            connection.query(insertQuery, insertValues, (err, insertResult) => {
+              if (err) {
+                console.error('Error al insertar en la base de datos:', err);
+                interaction.reply('Error al insertar en la base de datos.');
+                return;
+              }
 
-        if (existsInDatabase) {
-          // Si la IP o el nickname ya están en la base de datos, mostrar el mensaje correspondiente
-          replyMessage += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
-        } else {
-          // Si no existe, agregar el nuevo objeto a la base de datos
-          const newData = {
-            ip: ipAddress,
-            nickname: nickname,
-            esVPN: data?.security?.vpn,
-            esProxy: data?.security?.proxy,
-            esTOR: data?.security?.tor,
-            country: data?.location?.country ?? 'No disponible',
-            continent: data?.location?.continent ?? 'No disponible',
-            country_code: data?.location?.country_code ?? 'No disponible',
-            latitude: data?.location?.latitude ?? 'No disponible',
-            longitude: data?.location?.longitude ?? 'No disponible',
-            time_zone: data?.location?.time_zone ?? 'No disponible',
-            autonomous_system_number: data?.network?.autonomous_system_number ?? 'No disponible',
-            autonomous_system_organization: data?.network?.autonomous_system_organization ?? 'No disponible',
-          };
-          database.push(newData);
+              // Mostrar el mensaje de que se agregó la información
+              replyMessage += '\nInformación agregada a la base de datos.';
+            });
+          }
 
-          // Escribir el contenido actualizado en el archivo JSON
-          await fs.writeFile('database.json', JSON.stringify(database, null, 2));
-
-          // Mostrar el mensaje de que se agregó la información
-          replyMessage += '\nInformación agregada a la base de datos.';
-        }
-
-        // Responder con la información completa
-        await interaction.reply(replyMessage);
+          // Responder con la información completa
+          interaction.reply(replyMessage);
+        });
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
       }
