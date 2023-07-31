@@ -1,8 +1,10 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
+const readlineSync = require('readline-sync');
+const fs = require('fs');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
-const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
+const apiKey = 'YOUR_API_KEY';
 
 // Función para traducir true/false a SI/NO
 function traducirBoolean(valor) {
@@ -17,9 +19,15 @@ module.exports = {
       option.setName('ip')
         .setDescription('Dirección IP a consultar')
         .setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName('nickname')
+        .setDescription('Nickname asociado a la dirección IP')
+        .setRequired(true)
     ),
   async execute(interaction) {
     const ipAddress = interaction.options.getString('ip');
+    const nickname = interaction.options.getString('nickname');
     const url = `https://vpnapi.io/api/${ipAddress}?key=${apiKey}`;
 
     try {
@@ -49,6 +57,35 @@ module.exports = {
           + `Autonomous System Number (ASN): ${data.network.autonomous_system_number}\n`
           + `Autonomous System Organization (ASO): ${data.network.autonomous_system_organization}`
         );
+
+        // Guardar la información en un archivo JSON
+        const newData = {
+          ip: ipAddress,
+          nickname: nickname,
+        };
+
+        // Leer el archivo JSON actual (si existe)
+        let database = [];
+        try {
+          const databaseContent = fs.readFileSync('database.json', 'utf8');
+          database = JSON.parse(databaseContent);
+        } catch (error) {
+          // El archivo no existe o está vacío
+        }
+
+        // Verificar si la IP o el nickname ya están en la base de datos
+        const ipExists = database.some((entry) => entry.ip === newData.ip);
+        const nicknameExists = database.some((entry) => entry.nickname === newData.nickname);
+
+        // Verificar si la IP o el nickname ya están en la base de datos y mostrar el resultado
+        if (ipExists || nicknameExists) {
+          interaction.followUp('Ya existe en la base de datos.');
+        } else {
+          // Agregar la nueva entrada a la base de datos y guardarla en el archivo JSON
+          database.push(newData);
+          fs.writeFileSync('database.json', JSON.stringify(database, null, 2));
+          interaction.followUp('Información guardada en la base de datos.');
+        }
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
       }
