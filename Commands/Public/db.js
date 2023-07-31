@@ -1,10 +1,12 @@
-const mysql = require('mysql2');
+const mysql = require('mysql');
 
 // Crear la conexión a la base de datos
 const connection = mysql.createConnection({
-  // Utilizar la URL proporcionada por Railway para la conexión
-  uri: process.env.MYSQL_URL,
-  database: process.env.MYSQLDATABASE,
+  host: 'containers-us-west-62.railway.app',
+  user: 'root',
+  password: 'nXRnS3cCeqA9qveREbdO',
+  database: 'railway',
+  port: 5600,
 });
 
 // Establecer la conexión
