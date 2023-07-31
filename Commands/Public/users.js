@@ -9,7 +9,7 @@ module.exports = {
   async execute(interaction) {
     try {
       // Consultar la base de datos para obtener los usuarios e IPs
-      const query = 'SELECT nickname, ip FROM users';
+      const query = 'SELECT nickname, ip FROM usuarios';
       db.query(query, (err, results) => {
         if (err) {
           console.error('Error al consultar la base de datos:', err);
