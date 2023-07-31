@@ -52,8 +52,31 @@ module.exports = {
           ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
           ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
         ];
+        const config = {
+          border: {
+            topBody: '═',
+            topJoin: '╤',
+            topLeft: '╔',
+            topRight: '╗',
 
-        const output = table(outputTable);
+            bottomBody: '═',
+            bottomJoin: '╧',
+            bottomLeft: '╚',
+            bottomRight: '╝',
+
+            bodyLeft: '│',
+            bodyRight: '│',
+            bodyJoin: '│',
+
+            joinBody: '─',
+            joinLeft: '├',
+            joinRight: '┤',
+            joinJoin: '┼'
+          },
+          singleLine: true
+        };
+
+        const output = table(outputTable, config);
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
