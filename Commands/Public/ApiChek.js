@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const db = require('./db');
-const { table } = require('table');
 
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
@@ -38,51 +37,22 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const outputTable = [
-          ['Información sobre la dirección IP', ipAddress],
-          ['¿Es una VPN?', esVPN],
-          ['¿Es un proxy?', esProxy],
-          ['¿Es TOR?', esTOR],
-          ['País', data?.location?.country ?? 'No disponible'],
-          ['Continente', data?.location?.continent ?? 'No disponible'],
-          ['Código del país', data?.location?.country_code ?? 'No disponible'],
-          ['Latitud', data?.location?.latitude ?? 'No disponible'],
-          ['Longitud', data?.location?.longitude ?? 'No disponible'],
-          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
-          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
-          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
+        const formattedData = [
+          `Información sobre la dirección IP: ${ipAddress}`,
+          `¿Es una VPN?: ${esVPN}`,
+          `¿Es un proxy?: ${esProxy}`,
+          `¿Es TOR?: ${esTOR}`,
+          `País: ${data?.location?.country ?? 'No disponible'}`,
+          `Continente: ${data?.location?.continent ?? 'No disponible'}`,
+          `Código del país: ${data?.location?.country_code ?? 'No disponible'}`,
+          `Latitud: ${data?.location?.latitude ?? 'No disponible'}`,
+          `Longitud: ${data?.location?.longitude ?? 'No disponible'}`,
+          `Zona horaria: ${data?.location?.time_zone ?? 'No disponible'}`,
+          `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}`,
+          `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`
         ];
 
-        // Configuración de la tabla
-        const config = {
-          border: {
-            topBody: '═',
-            topJoin: '╤',
-            topLeft: '╔',
-            topRight: '╗',
-
-            bottomBody: '═',
-            bottomJoin: '╧',
-            bottomLeft: '╚',
-            bottomRight: '╝',
-
-            bodyLeft: '│',
-            bodyRight: '│',
-            bodyJoin: '│',
-
-            joinBody: '─',
-            joinLeft: '├',
-            joinRight: '┤',
-            joinJoin: '┼'
-          },
-        };
-
-        // Generar la tabla con los datos y la configuración
-        let formattedTable = table(outputTable, config);
-
-        // Limitar la longitud de las celdas a un valor máximo (por ejemplo, 25 caracteres)
-        const cellWidthLimit = 25;
-        formattedTable = formattedTable.replace(/(?<=\|[^|]{0,25})\s/g, ' ');
+        const replyMessage = formattedData.join('\n');
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
@@ -94,7 +64,7 @@ module.exports = {
             return;
           }
 
-          const successMessage = `\nInformación agregada a la base de datos:\n${formattedTable}`;
+          const successMessage = `\nInformación agregada a la base de datos:\n${replyMessage}`;
           interaction.reply(successMessage);
         });
       } else {
