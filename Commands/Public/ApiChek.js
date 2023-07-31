@@ -38,7 +38,7 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const tableData = [
+        const outputTable = [
           ['Información sobre la dirección IP', ipAddress],
           ['¿Es una VPN?', esVPN],
           ['¿Es un proxy?', esProxy],
