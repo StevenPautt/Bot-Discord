@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const db = require('./db');
-const { table } = require('table');
+const Table = require('cli-table3');
 
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
@@ -38,55 +38,44 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const outputTable = [
-          ['Información sobre la dirección IP', ipAddress],
-          ['¿Es una VPN?', esVPN],
-          ['¿Es un proxy?', esProxy],
-          ['¿Es TOR?', esTOR],
-          ['País', data?.location?.country ?? 'No disponible'],
-          ['Continente', data?.location?.continent ?? 'No disponible'],
-          ['Código del país', data?.location?.country_code ?? 'No disponible'],
-          ['Latitud', data?.location?.latitude ?? 'No disponible'],
-          ['Longitud', data?.location?.longitude ?? 'No disponible'],
-          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
-          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
-          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
-        ];
-
-        // Configuración de la tabla
-        const config = {
-          columns: {
-            0: {
-              width: 40, // Ancho de la primera columna
-              wrapWord: true // Romper palabras largas
-            },
-            1: {
-              width: 20 // Ancho de la segunda columna
-            }
+        const table = new Table({
+          chars: {
+            top: '═',
+            'top-mid': '╤',
+            'top-left': '╔',
+            'top-right': '╗',
+            bottom: '═',
+            'bottom-mid': '╧',
+            'bottom-left': '╚',
+            'bottom-right': '╝',
+            left: '║',
+            'left-mid': '╟',
+            mid: '─',
+            'mid-mid': '┼',
+            right: '║',
+            'right-mid': '╢',
+            middle: '│'
           },
-          border: {
-            topBody: '═',
-            topJoin: '╤',
-            topLeft: '╔',
-            topRight: '╗',
-
-            bottomBody: '═',
-            bottomJoin: '╧',
-            bottomLeft: '╚',
-            bottomRight: '╝',
-
-            bodyLeft: '│',
-            bodyRight: '│',
-            bodyJoin: '│',
-
-            joinBody: '─',
-            joinLeft: '├',
-            joinRight: '┤',
-            joinJoin: '┼'
+          style: {
+            head: ['cyan'],
+            border: ['grey']
           }
-        };
+        });
 
-        const output = table(outputTable, config);
+        table.push(
+          { 'Información sobre la dirección IP': ipAddress },
+          { '¿Es una VPN?': esVPN },
+          { '¿Es un proxy?': esProxy },
+          { '¿Es TOR?': esTOR },
+          { 'País': data?.location?.country ?? 'No disponible' },
+          { 'Continente': data?.location?.continent ?? 'No disponible' },
+          { 'Código del país': data?.location?.country_code ?? 'No disponible' },
+          { 'Latitud': data?.location?.latitude ?? 'No disponible' },
+          { 'Longitud': data?.location?.longitude ?? 'No disponible' },
+          { 'Zona horaria': data?.location?.time_zone ?? 'No disponible' },
+          { 'Autonomous System Number (ASN)': data?.network?.autonomous_system_number ?? 'No disponible' },
+          { 'Autonomous System Organization (ASO)': data?.network?.autonomous_system_organization ?? 'No disponible' }
+        );
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
@@ -98,7 +87,7 @@ module.exports = {
             return;
           }
 
-          const successMessage = `\nInformación agregada a la base de datos:\n${output}`;
+          const successMessage = `\nInformación agregada a la base de datos:\n${table.toString()}`;
           interaction.reply(successMessage);
         });
       } else {
