@@ -47,6 +47,4 @@ module.exports = {
             es_tor: entry.es_tor, // Mantenemos los valores directos de la base de datos
             pais: entry.pais,
           });
-        }
-
-       
+        };
