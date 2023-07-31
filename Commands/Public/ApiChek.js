@@ -52,7 +52,18 @@ module.exports = {
           ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
           ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
         ];
+
+        // Configuración de la tabla
         const config = {
+          columns: {
+            0: {
+              width: 40, // Ancho de la primera columna
+              wrapWord: true // Romper palabras largas
+            },
+            1: {
+              width: 20 // Ancho de la segunda columna
+            }
+          },
           border: {
             topBody: '═',
             topJoin: '╤',
@@ -72,8 +83,7 @@ module.exports = {
             joinLeft: '├',
             joinRight: '┤',
             joinJoin: '┼'
-          },
-          singleLine: true
+          }
         };
 
         const output = table(outputTable, config);
