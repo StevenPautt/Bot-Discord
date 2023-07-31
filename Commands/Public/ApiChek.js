@@ -75,11 +75,14 @@ module.exports = {
             joinRight: '┤',
             joinJoin: '┼'
           },
-          singleLine: true
         };
 
         // Generar la tabla con los datos y la configuración
-        const formattedTable = table(outputTable, config);
+        let formattedTable = table(outputTable, config);
+
+        // Limitar la longitud de las celdas a un valor máximo (por ejemplo, 25 caracteres)
+        const cellWidthLimit = 25;
+        formattedTable = formattedTable.replace(/(?<=\|[^|]{0,25})\s/g, ' ');
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
