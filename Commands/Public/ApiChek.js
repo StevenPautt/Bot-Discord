@@ -1,6 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
-const readlineSync = require('readline-sync');
 const fs = require('fs');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
@@ -38,9 +37,9 @@ module.exports = {
         const data = response.data;
 
         // Realizar la traducción de true/false a SI/NO
-        const esVPN = traducirBoolean(data.security.vpn);
-        const esProxy = traducirBoolean(data.security.proxy);
-        const esTOR = traducirBoolean(data.security.tor);
+        const esVPN = data?.security?.vpn ? traducirBoolean(data.security.vpn) : 'No disponible';
+        const esProxy = data?.security?.proxy ? traducirBoolean(data.security.proxy) : 'No disponible';
+        const esTOR = data?.security?.tor ? traducirBoolean(data.security.tor) : 'No disponible';
 
         // Responder con la información de la dirección IP
         interaction.reply(
@@ -48,14 +47,14 @@ module.exports = {
           + `¿Es una VPN?: ${esVPN}\n`
           + `¿Es un proxy?: ${esProxy}\n`
           + `¿Es TOR?: ${esTOR}\n`
-          + `País: ${data.location.country}\n`
-          + `Continente: ${data.location.continent}\n`
-          + `Código del país: ${data.location.country_code}\n`
-          + `Latitud: ${data.location.latitude}\n`
-          + `Longitud: ${data.location.longitude}\n`
-          + `Zona horaria: ${data.location.time_zone}\n`
-          + `Autonomous System Number (ASN): ${data.network.autonomous_system_number}\n`
-          + `Autonomous System Organization (ASO): ${data.network.autonomous_system_organization}`
+          + `País: ${data?.location?.country ?? 'No disponible'}\n`
+          + `Continente: ${data?.location?.continent ?? 'No disponible'}\n`
+          + `Código del país: ${data?.location?.country_code ?? 'No disponible'}\n`
+          + `Latitud: ${data?.location?.latitude ?? 'No disponible'}\n`
+          + `Longitud: ${data?.location?.longitude ?? 'No disponible'}\n`
+          + `Zona horaria: ${data?.location?.time_zone ?? 'No disponible'}\n`
+          + `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}\n`
+          + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`
         );
 
         // Guardar la información en un archivo JSON
