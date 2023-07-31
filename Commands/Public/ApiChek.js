@@ -52,13 +52,13 @@ module.exports = {
           ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
           ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
         ];
-
+    
         // Configuración de la tabla
         const config = {
           columns: {
             0: {
               alignment: 'left',
-              width: 30,
+              width: 40,
             },
             1: {
               alignment: 'left',
@@ -66,7 +66,9 @@ module.exports = {
             },
           },
         };
-
+    
+        // Generar la tabla con los datos y la configuración
+        const { table } = require('table');
         const output = table(outputTable, config);
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
