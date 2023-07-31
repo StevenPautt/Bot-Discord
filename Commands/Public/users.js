@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const db = require('./db');
+const Table = require('table');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -8,7 +9,7 @@ module.exports = {
   async execute(interaction) {
     try {
       // Consultar la base de datos para obtener los usuarios e IPs
-      const query = 'SELECT nickname, ip FROM usuarios';
+      const query = 'SELECT nickname, ip FROM users';
       db.query(query, (err, results) => {
         if (err) {
           console.error('Error al consultar la base de datos:', err);
@@ -22,13 +23,27 @@ module.exports = {
           return;
         }
 
-        // Construir la lista de usuarios e IPs
-        let userList = 'Usuarios e IPs en la base de datos:\n';
+        // Crear la tabla con los resultados de la consulta
+        const data = [['Usuario', 'IP']];
         for (const entry of results) {
-          userList += `Usuario: ${entry.nickname}, IP: ${entry.ip}\n`;
+          data.push([entry.nickname, entry.ip]);
         }
+        const config = {
+          columns: {
+            0: {
+              alignment: 'left',
+              width: 30,
+            },
+            1: {
+              alignment: 'left',
+              width: 15,
+            },
+          },
+        };
+        const table = Table.table(data, config);
 
-        interaction.reply(userList);
+        // Responder con la tabla formateada
+        interaction.reply('Usuarios e IPs en la base de datos:\n```' + table + '```');
       });
     } catch (error) {
       interaction.reply(`Error al leer la base de datos: ${error.message}`);
