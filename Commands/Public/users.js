@@ -47,4 +47,19 @@ module.exports = {
             es_tor: entry.es_tor, // Mantenemos los valores directos de la base de datos
             pais: entry.pais,
           });
-        };
+        }
+
+        // Escribir los datos en el archivo Excel
+        const buffer = await workbook.xlsx.writeBuffer();
+        interaction.reply({
+          files: [{
+            attachment: buffer,
+            name: 'usuarios_ips.xlsx',
+          }],
+        });
+      });
+    } catch (error) {
+      interaction.reply(`Error al leer la base de datos: ${error.message}`);
+    }
+  },
+};
