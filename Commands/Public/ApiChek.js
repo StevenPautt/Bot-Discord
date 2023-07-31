@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
-const db = require('../db');
+const db = require('./db');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
