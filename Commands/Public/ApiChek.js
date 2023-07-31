@@ -36,10 +36,10 @@ module.exports = {
       if (response.status === 200) {
         const data = response.data;
 
-        // Realizar la traducción de true/false a SI/NO
-        const esVPN = data?.security?.vpn ? traducirBoolean(data.security.vpn) : 'No disponible';
-        const esProxy = data?.security?.proxy ? traducirBoolean(data.security.proxy) : 'No disponible';
-        const esTOR = data?.security?.tor ? traducirBoolean(data.security.tor) : 'No disponible';
+        // Realizar la traducción de true/false a SI/NO usando la función traducirBoolean
+        const esVPN = traducirBoolean(data?.security?.vpn);
+        const esProxy = traducirBoolean(data?.security?.proxy);
+        const esTOR = traducirBoolean(data?.security?.tor);
 
         // Construir la respuesta con la información de la dirección IP
         let replyMessage = `Información sobre la dirección IP ${ipAddress}:\n`
