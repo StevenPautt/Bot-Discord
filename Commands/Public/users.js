@@ -9,7 +9,7 @@ module.exports = {
   async execute(interaction) {
     try {
       // Consultar la base de datos para obtener los usuarios e IPs
-      const query = 'SELECT nickname, ip FROM usuarios';
+      const query = 'SELECT nickname, ip, es_vpn, es_proxy, es_tor, pais FROM usuarios';
       db.query(query, async (err, results) => {
         if (err) {
           console.error('Error al consultar la base de datos:', err);
@@ -31,11 +31,22 @@ module.exports = {
         worksheet.columns = [
           { header: 'Usuario', key: 'nickname', width: 30 },
           { header: 'IP', key: 'ip', width: 15 },
+          { header: '¿Es una VPN?', key: 'es_vpn', width: 15 },
+          { header: '¿Es un proxy?', key: 'es_proxy', width: 15 },
+          { header: '¿Es TOR?', key: 'es_tor', width: 15 },
+          { header: 'País', key: 'pais', width: 30 },
         ];
 
         // Agregar los datos de la base de datos a la tabla en el archivo Excel
         for (const entry of results) {
-          worksheet.addRow({ nickname: entry.nickname, ip: entry.ip });
+          worksheet.addRow({
+            nickname: entry.nickname,
+            ip: entry.ip,
+            es_vpn: entry.es_vpn ? 'SI ⚠️' : 'NO',
+            es_proxy: entry.es_proxy ? 'SI ⚠️' : 'NO',
+            es_tor: entry.es_tor ? 'SI ⚠️' : 'NO',
+            pais: entry.pais,
+          });
         }
 
         // Generar el archivo Excel
