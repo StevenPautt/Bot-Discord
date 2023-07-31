@@ -46,7 +46,18 @@ module.exports = {
           ['País', data?.location?.country ?? 'No disponible']
         ];
 
-        const output = table(outputTable);
+        // Configuración de la tabla
+        const config = {
+          columns: {
+            0: { width: 40, wrapWord: true },
+            1: { width: 20, wrapWord: true }
+          },
+          drawHorizontalLine: (index, size) => {
+            return index === 0 || index === 1 || index === size;
+          }
+        };
+
+        const output = table(outputTable, config);
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
