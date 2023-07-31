@@ -38,26 +38,22 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const outputTable = [
+        const tableData = [
           ['Información sobre la dirección IP', ipAddress],
           ['¿Es una VPN?', esVPN],
           ['¿Es un proxy?', esProxy],
           ['¿Es TOR?', esTOR],
-          ['País', data?.location?.country ?? 'No disponible']
+          ['País', data?.location?.country ?? 'No disponible'],
+          ['Continente', data?.location?.continent ?? 'No disponible'],
+          ['Código del país', data?.location?.country_code ?? 'No disponible'],
+          ['Latitud', data?.location?.latitude ?? 'No disponible'],
+          ['Longitud', data?.location?.longitude ?? 'No disponible'],
+          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
+          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
+          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
         ];
 
-        // Configuración de la tabla
-        const config = {
-          columns: {
-            0: { width: 40, wrapWord: true },
-            1: { width: 20, wrapWord: true }
-          },
-          drawHorizontalLine: (index, size) => {
-            return index === 0 || index === 1 || index === size;
-          }
-        };
-
-        const output = table(outputTable, config);
+        const output = table(outputTable);
 
         const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
         const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
