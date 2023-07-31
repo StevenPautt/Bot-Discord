@@ -46,9 +46,9 @@ module.exports = {
           worksheet.addRow({
             nickname: entry.nickname,
             ip: entry.ip,
-            es_vpn: traducirBoolean(entry.es_vpn),
-            es_proxy: traducirBoolean(entry.es_proxy),
-            es_tor: traducirBoolean(entry.es_tor),
+            es_vpn: traducirBoolean(entry.es_vpn === 'SI'), // Corregir aquí
+            es_proxy: traducirBoolean(entry.es_proxy === 'SI'), // Corregir aquí
+            es_tor: traducirBoolean(entry.es_tor === 'SI'), // Corregir aquí
             pais: entry.pais,
           });
         }
