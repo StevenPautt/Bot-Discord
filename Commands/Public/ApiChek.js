@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const db = require('./db');
-const { table } = require('table');
 
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 
@@ -38,51 +37,50 @@ module.exports = {
         const esProxy = traducirBoolean(data?.security?.proxy);
         const esTOR = traducirBoolean(data?.security?.tor);
 
-        const outputTable = [
-          ['Información sobre la dirección IP', ipAddress],
-          ['¿Es una VPN?', esVPN],
-          ['¿Es un proxy?', esProxy],
-          ['¿Es TOR?', esTOR],
-          ['País', data?.location?.country ?? 'No disponible'],
-          ['Continente', data?.location?.continent ?? 'No disponible'],
-          ['Código del país', data?.location?.country_code ?? 'No disponible'],
-          ['Latitud', data?.location?.latitude ?? 'No disponible'],
-          ['Longitud', data?.location?.longitude ?? 'No disponible'],
-          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
-          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
-          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
-        ];
-    
-        // Configuración de la tabla
-        const config = {
-          columns: {
-            0: {
-              alignment: 'left',
-              width: 40,
-            },
-            1: {
-              alignment: 'left',
-              width: 20,
-            },
-          },
-        };
-    
-        // Generar la tabla con los datos y la configuración
-        const { table } = require('table');
-        const output = table(outputTable, config);
+        // Construir la respuesta con la información de la dirección IP
+        let replyMessage = `Información sobre la dirección IP ${ipAddress}:\n`
+          + `¿Es una VPN?: ${esVPN}\n`
+          + `¿Es un proxy?: ${esProxy}\n`
+          + `¿Es TOR?: ${esTOR}\n`
+          + `País: ${data?.location?.country ?? 'No disponible'}\n`
+          + `Continente: ${data?.location?.continent ?? 'No disponible'}\n`
+          + `Código del país: ${data?.location?.country_code ?? 'No disponible'}\n`
+          + `Latitud: ${data?.location?.latitude ?? 'No disponible'}\n`
+          + `Longitud: ${data?.location?.longitude ?? 'No disponible'}\n`
+          + `Zona horaria: ${data?.location?.time_zone ?? 'No disponible'}\n`
+          + `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}\n`
+          + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`;
 
-        const sqlQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor, pais) VALUES (?, ?, ?, ?, ?, ?)`;
-        const insertValues = [nickname, ipAddress, esVPN, esProxy, esTOR, data?.location?.country ?? 'No disponible'];
-
-        db.query(sqlQuery, insertValues, (err, insertResult) => {
+        // Verificar si el usuario ya está en la base de datos
+        const sqlQuery = `SELECT * FROM usuarios WHERE nickname = ? OR ip = ?`;
+        db.query(sqlQuery, [nickname, ipAddress], (err, results) => {
           if (err) {
-            console.error('Error al insertar en la base de datos:', err);
-            interaction.reply('Error al insertar en la base de datos.');
+            console.error('Error al realizar la consulta:', err);
+            interaction.reply('Error al consultar la base de datos.');
             return;
           }
 
-          const successMessage = `\nInformación agregada a la base de datos:\n${output}`;
-          interaction.reply(successMessage);
+          if (results.length > 0) {
+            // Si el usuario ya está en la base de datos, mostrar el mensaje correspondiente
+            replyMessage += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
+          } else {
+            // Si no existe, agregar el nuevo registro a la base de datos
+            const insertQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor) VALUES (?, ?, ?, ?, ?)`;
+            const insertValues = [nickname, ipAddress, data?.security?.vpn, data?.security?.proxy, data?.security?.tor];
+            db.query(insertQuery, insertValues, (err, insertResult) => {
+              if (err) {
+                console.error('Error al insertar en la base de datos:', err);
+                interaction.reply('Error al insertar en la base de datos.');
+                return;
+              }
+
+              // Mostrar el mensaje de que se agregó la información
+              replyMessage += '\nInformación agregada a la base de datos.';
+            });
+          }
+
+          // Responder con la información completa
+          interaction.reply(replyMessage);
         });
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
