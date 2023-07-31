@@ -1,6 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
 const db = require('./db');
+const { table } = require('table'); // Agregamos la librería 'table'
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
@@ -42,18 +43,23 @@ module.exports = {
         const esTOR = traducirBoolean(data?.security?.tor);
 
         // Construir la respuesta con la información de la dirección IP
-        let replyMessage = `Información sobre la dirección IP ${ipAddress}:\n`
-          + `¿Es una VPN?: ${esVPN}\n`
-          + `¿Es un proxy?: ${esProxy}\n`
-          + `¿Es TOR?: ${esTOR}\n`
-          + `País: ${data?.location?.country ?? 'No disponible'}\n`
-          + `Continente: ${data?.location?.continent ?? 'No disponible'}\n`
-          + `Código del país: ${data?.location?.country_code ?? 'No disponible'}\n`
-          + `Latitud: ${data?.location?.latitude ?? 'No disponible'}\n`
-          + `Longitud: ${data?.location?.longitude ?? 'No disponible'}\n`
-          + `Zona horaria: ${data?.location?.time_zone ?? 'No disponible'}\n`
-          + `Autonomous System Number (ASN): ${data?.network?.autonomous_system_number ?? 'No disponible'}\n`
-          + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`;
+        const tableData = [
+          ['Información sobre la dirección IP', ipAddress],
+          ['¿Es una VPN?', esVPN],
+          ['¿Es un proxy?', esProxy],
+          ['¿Es TOR?', esTOR],
+          ['País', data?.location?.country ?? 'No disponible'],
+          ['Continente', data?.location?.continent ?? 'No disponible'],
+          ['Código del país', data?.location?.country_code ?? 'No disponible'],
+          ['Latitud', data?.location?.latitude ?? 'No disponible'],
+          ['Longitud', data?.location?.longitude ?? 'No disponible'],
+          ['Zona horaria', data?.location?.time_zone ?? 'No disponible'],
+          ['Autonomous System Number (ASN)', data?.network?.autonomous_system_number ?? 'No disponible'],
+          ['Autonomous System Organization (ASO)', data?.network?.autonomous_system_organization ?? 'No disponible'],
+        ];
+
+        // Generar la tabla
+        const output = table(tableData);
 
         // Verificar si el usuario ya está en la base de datos
         const sqlQuery = `SELECT * FROM usuarios WHERE nickname = ? OR ip = ?`;
@@ -66,7 +72,7 @@ module.exports = {
 
           if (results.length > 0) {
             // Si el usuario ya está en la base de datos, mostrar el mensaje correspondiente
-            replyMessage += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
+            output += `\nYa existe en la base de datos: Usuario ${nickname} con IP ${ipAddress}`;
           } else {
             // Si no existe, agregar el nuevo registro a la base de datos
             const insertQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor) VALUES (?, ?, ?, ?, ?)`;
@@ -79,12 +85,12 @@ module.exports = {
               }
 
               // Mostrar el mensaje de que se agregó la información
-              replyMessage += '\nInformación agregada a la base de datos.';
+              output += '\nInformación agregada a la base de datos.';
             });
           }
 
-          // Responder con la información completa
-          interaction.reply(replyMessage);
+          // Responder con la tabla completa
+          interaction.reply(`\`\`\`${output}\`\`\``);
         });
       } else {
         interaction.reply(`Error en la solicitud. Código de error: ${response.status}`);
