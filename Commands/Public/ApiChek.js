@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('discord.js');
 const axios = require('axios');
-const mysql = require('mysql');
+const db = require('./db');
 
 // Reemplaza 'YOUR_API_KEY' con tu clave de API
 const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
@@ -9,23 +9,6 @@ const apiKey = '63b09a153d4b4bec80be95f0f1e559ae';
 function traducirBoolean(valor) {
   return valor ? 'SI ⚠️' : 'NO';
 }
-
-// Configuración de la conexión a MySQL
-const connection = mysql.createConnection({
-  host: 'tu_host',
-  user: 'tu_usuario',
-  password: 'tu_contraseña',
-  database: 'tu_base_de_datos',
-});
-
-// Establecer la conexión a MySQL
-connection.connect((err) => {
-  if (err) {
-    console.error('Error al conectar a la base de datos:', err);
-    return;
-  }
-  console.log('Conexión a la base de datos establecida.');
-});
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -74,7 +57,7 @@ module.exports = {
 
         // Verificar si el usuario ya está en la base de datos
         const sqlQuery = `SELECT * FROM usuarios WHERE nickname = ? OR ip = ?`;
-        connection.query(sqlQuery, [nickname, ipAddress], (err, results) => {
+        db.query(sqlQuery, [nickname, ipAddress], (err, results) => {
           if (err) {
             console.error('Error al realizar la consulta:', err);
             interaction.reply('Error al consultar la base de datos.');
@@ -88,7 +71,7 @@ module.exports = {
             // Si no existe, agregar el nuevo registro a la base de datos
             const insertQuery = `INSERT INTO usuarios (nickname, ip, es_vpn, es_proxy, es_tor) VALUES (?, ?, ?, ?, ?)`;
             const insertValues = [nickname, ipAddress, data?.security?.vpn, data?.security?.proxy, data?.security?.tor];
-            connection.query(insertQuery, insertValues, (err, insertResult) => {
+            db.query(insertQuery, insertValues, (err, insertResult) => {
               if (err) {
                 console.error('Error al insertar en la base de datos:', err);
                 interaction.reply('Error al insertar en la base de datos.');
