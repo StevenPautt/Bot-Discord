@@ -41,10 +41,21 @@ module.exports = {
         const esProxy = data?.security?.proxy ? traducirBoolean(data.security.proxy) : 'No disponible';
         const esTOR = data?.security?.tor ? traducirBoolean(data.security.tor) : 'No disponible';
 
-        // Guardar la información en un archivo JSON
+        // Guardar la información en un objeto
         const newData = {
           ip: ipAddress,
           nickname: nickname,
+          esVPN: esVPN,
+          esProxy: esProxy,
+          esTOR: esTOR,
+          country: data?.location?.country ?? 'No disponible',
+          continent: data?.location?.continent ?? 'No disponible',
+          country_code: data?.location?.country_code ?? 'No disponible',
+          latitude: data?.location?.latitude ?? 'No disponible',
+          longitude: data?.location?.longitude ?? 'No disponible',
+          time_zone: data?.location?.time_zone ?? 'No disponible',
+          autonomous_system_number: data?.network?.autonomous_system_number ?? 'No disponible',
+          autonomous_system_organization: data?.network?.autonomous_system_organization ?? 'No disponible',
         };
 
         // Leer el archivo JSON actual (si existe)
@@ -56,11 +67,13 @@ module.exports = {
           // El archivo no existe o está vacío
         }
 
-        // Verificar si la IP o el nickname ya están en la base de datos
-        const ipExists = database.some((entry) => entry.ip === newData.ip);
-        const nicknameExists = database.some((entry) => entry.nickname === newData.nickname);
+        // Agregar el nuevo objeto a la base de datos
+        database.push(newData);
 
-        // Construir la respuesta con la información de la dirección IP y la información de la base de datos
+        // Escribir el contenido actualizado en el archivo JSON
+        await fs.writeFile('database.json', JSON.stringify(database, null, 2));
+
+        // Construir la respuesta con la información de la dirección IP
         let replyMessage = `Información sobre la dirección IP ${ipAddress}:\n`
           + `¿Es una VPN?: ${esVPN}\n`
           + `¿Es un proxy?: ${esProxy}\n`
@@ -75,6 +88,8 @@ module.exports = {
           + `Autonomous System Organization (ASO): ${data?.network?.autonomous_system_organization ?? 'No disponible'}`;
 
         // Verificar si la IP o el nickname ya están en la base de datos y agregar el mensaje correspondiente
+        const ipExists = database.some((entry) => entry.ip === ipAddress);
+        const nicknameExists = database.some((entry) => entry.nickname === nickname);
         if (ipExists || nicknameExists) {
           replyMessage += '\nYa existe en la base de datos.';
         }
