@@ -55,16 +55,27 @@ module.exports = {
 
         // Configuración de la tabla
         const config = {
-          columns: {
-            0: {
-              alignment: 'left',
-              width: 40,
-            },
-            1: {
-              alignment: 'left',
-              width: 20,
-            },
+          border: {
+            topBody: '═',
+            topJoin: '╤',
+            topLeft: '╔',
+            topRight: '╗',
+
+            bottomBody: '═',
+            bottomJoin: '╧',
+            bottomLeft: '╚',
+            bottomRight: '╝',
+
+            bodyLeft: '│',
+            bodyRight: '│',
+            bodyJoin: '│',
+
+            joinBody: '─',
+            joinLeft: '├',
+            joinRight: '┤',
+            joinJoin: '┼'
           },
+          singleLine: true
         };
 
         // Generar la tabla con los datos y la configuración
