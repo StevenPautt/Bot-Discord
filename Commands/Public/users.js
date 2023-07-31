@@ -2,6 +2,10 @@ const { SlashCommandBuilder } = require('discord.js');
 const db = require('./db');
 const Excel = require('exceljs');
 
+function traducirBoolean(valor) {
+  return valor ? 'SI ⚠️' : 'NO';
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('users')
@@ -42,9 +46,9 @@ module.exports = {
           worksheet.addRow({
             nickname: entry.nickname,
             ip: entry.ip,
-            es_vpn: entry.es_vpn ? 'SI ⚠️' : 'NO',
-            es_proxy: entry.es_proxy ? 'SI ⚠️' : 'NO',
-            es_tor: entry.es_tor ? 'SI ⚠️' : 'NO',
+            es_vpn: traducirBoolean(entry.es_vpn),
+            es_proxy: traducirBoolean(entry.es_proxy),
+            es_tor: traducirBoolean(entry.es_tor),
             pais: entry.pais,
           });
         }
