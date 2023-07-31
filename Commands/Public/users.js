@@ -2,10 +2,6 @@ const { SlashCommandBuilder } = require('discord.js');
 const db = require('./db');
 const Excel = require('exceljs');
 
-function traducirBoolean(valor) {
-  return valor ? 'SI ⚠️' : 'NO';
-}
-
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('users')
@@ -46,26 +42,11 @@ module.exports = {
           worksheet.addRow({
             nickname: entry.nickname,
             ip: entry.ip,
-            es_vpn: traducirBoolean(entry.es_vpn === 'SI'), // Corregir aquí
-            es_proxy: traducirBoolean(entry.es_proxy === 'SI'), // Corregir aquí
-            es_tor: traducirBoolean(entry.es_tor === 'SI'), // Corregir aquí
+            es_vpn: entry.es_vpn, // Mantenemos los valores directos de la base de datos
+            es_proxy: entry.es_proxy, // Mantenemos los valores directos de la base de datos
+            es_tor: entry.es_tor, // Mantenemos los valores directos de la base de datos
             pais: entry.pais,
           });
         }
 
-        // Generar el archivo Excel
-        const buffer = await workbook.xlsx.writeBuffer();
-
-        // Responder con el archivo Excel como adjunto
-        interaction.reply({
-          files: [{
-            attachment: buffer,
-            name: 'usuarios_ips.xlsx', // Puedes cambiar el nombre del archivo si lo deseas
-          }],
-        });
-      });
-    } catch (error) {
-      interaction.reply(`Error al leer la base de datos: ${error.message}`);
-    }
-  },
-};
+       
